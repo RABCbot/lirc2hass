@@ -1,7 +1,7 @@
 LIRC to Home-assistant
 
 Losely based on https://github.com/akkana/scripts/blob/master/rpi/pyirw.py
-Moved to Asyncio and added REST calls to Homoe-assistant
+Moved to Asyncio and added REST calls to Home-assistant
 
 ## Install Lirc
 sudo apt update && apt upgrade
