@@ -4,8 +4,9 @@ import urllib3
 import json
 import logging
 import socket
+import yaml
 
-CONFIG_FILE = "/home/pi/lirc2hass.conf"
+CONFIG_FILE = "/home/pi/lirc2hass.yaml"
 SOCKET_PATH = "/var/run/lirc/lircd"
 
 logging.basicConfig(
@@ -33,16 +34,16 @@ def post_hass(url, token, service, data):
 def read_config(filename):
   try:
     with open(filename, "r") as f:
-      return json.load(f)
-  except IOError as ex:
-    logging.error("Failed to read configuration file, because %s", ex)
+      return yaml.safe_load(f)
+
+  except Exception as err:
+    logging.critical(f"Failed reading config file {filename}, because: str({err})")
+    return None
 
 class LircProtocol(asyncio.Protocol):
 
     def __init__(self, config, on_con_lost):
-        self.url = config["url"]
-        self.token = config["token"]
-        self.map = config["mapping"]
+        self.config = config
         self.transport = None
         self.on_con_lost = on_con_lost
 
@@ -53,10 +54,12 @@ class LircProtocol(asyncio.Protocol):
         data = data.decode()
         lirc = data.split()
         if lirc[1] == "00":
-            if lirc[2] in self.map:
-                hass = self.map[lirc[2]]
-                post_hass(self.url, self.token, hass["service"], hass["data"])
-                print(hass)
+            if lirc[2] in self.config:
+                actions = self.config[lirc[2]]
+                for action in actions:
+                  post_hass(self.config["url"], self.config["token"], action["service"], action["data"])
+            else:
+              logging.info(f"{lircc[2]} is not configured")
 
     def connection_lost(self, exc):
         self.on_con_lost.set_result(True)
