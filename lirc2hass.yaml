@@ -1,0 +1,9 @@
+url: http://homeassistant.local:8123/api/services
+token: <your-api-token>
+KEY_PLAY:
+  - service: script.family_computer
+    data:
+KEY_STOP:
+  - service: light.toggle
+    data:
+      entity_id: light.family_light
