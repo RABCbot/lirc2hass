@@ -54,8 +54,10 @@ class LircProtocol(asyncio.Protocol):
         data = data.decode()
         lirc = data.split()
         if lirc[1] == "00":
-            if lirc[2] in self.config:
-                actions = self.config[lirc[2]]
+            key = lirc[2]
+            logging.info(f"{key} pressed")
+            if key in self.config:
+                actions = self.config[key]
                 for action in actions:
                   post_hass(self.config["url"], self.config["token"], action["service"], action["data"])
             else:
